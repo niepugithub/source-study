@@ -38,6 +38,11 @@ public class SelectTest {
                 "selectEmployeeById", 1);
         System.out.println(employee);
 
+        employee = sqlSession.selectOne(
+                "selectEmployeeById", 1);
+
+        System.out.println(employee);
+
     }
 
     @Test
