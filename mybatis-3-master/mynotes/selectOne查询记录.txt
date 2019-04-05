@@ -1,0 +1,163 @@
+
+
+(DefaultSqlSession)sqlSession.selectOne("selectEmployeeById", 1) ==>
+List<T> list = this.selectList(statement, parameter);
+如果只有一个结果则返回，不止一个则报错；如果没有则返回null
+
+这里的statement表示的就是selectEmployeeById，就是执行SQL语句所在的那个id
+
+==> DefaultSqlSession.selectList(statement, parameter, RowBounds.DEFAULT)分页用的，默认无分页
+    根据statement对象获取到MappedStatement对象；ms对象中信息非常丰富：
+
+    rawSqlSource(***重要***，囊括sql语句，参数parameterMappings，也包括configuration对象，封装在staticSqlSource中)
+    SQLCommandType，是什么类型的sql，这里是SELECT，枚举类型，位置是4
+
+    有resource（mapper/employeeMapper.xml），Configuration对象，
+    id（com.source.domain.EmployeeMapper.selectEmployeeById）
+    fetchSize，timeout，statementType(PREPARED)，resultSetType(Default)
+    resultMap（type，完整限定名Employee类型），
+
+    ==> MappedStatement ms = configuration.getMappedStatement(statement);
+    wrapCollection(parameter)这里封装一下参数：如果是collection或者list或者array则返回map，值是parameter，键是collection或者list或者array
+    ==> executor.query(ms, wrapCollection(parameter), rowBounds, Executor.NO_RESULT_HANDLER)
+
+==> CachingExecutor.query(ms, Object parameterObject, rowBounds, resultHandler)
+    原来BoundSql是动态获取的，boundSql意思是绑定的sql？
+    ==>BoundSql boundSql = ms.getBoundSql(parameterObject); ms中持有sqlSource，交给sqlSource去获取boundSql
+           ==> (RawSqlSource,持有StaticSqlSource)sqlSource.getBoundSql(parameterObject);
+               ==> (交给静态的StaticSqlSource)sqlSource.getBoundSql(parameterObject);
+                    创建boundSql所需要的parameterMappings是之前就初始化好的，没留意
+                ==> return new BoundSql(configuration, sql, parameterMappings, parameterObject);
+           ==>List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
+           ParameterMapping也是个重要类：封装：property（参数名，这里是id），parameterMode（in），
+           javaType(Object)，jdbcType(null),typeHandler(持有typeHandlerRegistry，很多默认类型转化器)，
+           resultMapId等
+           ==> 遍历parameterMappings(parameterMapping的list):
+           ==> ms: return boundSql
+           // 从ms中获取到boundSql之后，就创建缓存key了
+    ==> CacheKey key = createCacheKey(ms, parameterObject, rowBounds, boundSql);
+        CachingExecutor也不自己去创建key，而是委托给持有对象SimpleExecutor;
+        SimpleExecutor调用从父类BaseExecutor中继承得到的createCacheKey创建key
+        ==> simpleExecutor.createCacheKey(ms, parameterObject, rowBounds, boundSql);
+            ==>CacheKey createCacheKey(ms, parameterObject, rowBounds, boundSql)
+            ==>CacheKey cacheKey = new CacheKey();
+            ==>cacheKey.update(ms.getId());
+            ==>cacheKey.update(rowBounds.getOffset());
+            ==>cacheKey.update(rowBounds.getLimit());
+            ==>cacheKey.update(boundSql.getSql());
+                cacheKey中存有的东西：updateList(com.source.domain.EmployeeMapper.selectEmployeeById,0,2147483647,select * from employee where id = ?)
+
+            ==>List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
+            ==>TypeHandlerRegistry typeHandlerRegistry = ms.getConfiguration().getTypeHandlerRegistry();
+
+            费了九牛二虎之力，就是为了拿到parameterObject中的值，放入到缓存的updateList中
+            最后还要加上environment中的id：develop，放入到updateList中，缓存key总算完成
+        ==> return CacheKey
+
+    ==> 调用本地方法：query(ms, parameterObject, rowBounds, resultHandler, key, boundSql);
+        ==> Cache cache = ms.getCache();
+            CacheExecutor(93-107)代码：只有查询是有缓存的，其他的没有缓存；所有上面的判断实际山也就是判断是不是查询；
+            而且这个缓存不是简单的缓存，而是TransactionalCacheManager。有待研究
+            看看是否刷新换粗；有缓存就从缓存中获取，没有则查询数据库。并且将查询到的结果放入到tcm中缓存起来；
+            如果没有缓存，则直接调用下面的方法获取数据；（不管有没有缓存，都是调用下面的方法获取数据的）
+            交给代理delegate(SimpleExecutor)去进行具体的查询操作
+        ==> delegate.query(ms, parameterObject, rowBounds, resultHandler, key, boundSql);
+            SimpleExecutor类型的代理delegate调用从BaseExecutor中继承的方法进行处理
+            ==> BaseExecutor.query(ms, Object parameter, rowBounds, resultHandler, cacheKey, boundSql)
+                创建ErrorContext记录查询日志
+                ==> ErrorContext.instance().resource(ms.getResource()).activity("executing a query").object(ms.getId());
+                ==> (PerpetualCache)localCache.getObject(key) 从缓存中获取数据
+                ==> queryFromDatabase(ms, parameter, rowBounds, resultHandler, key, boundSql);缓存中没有
+                    ==> localCache.putObject(key, EXECUTION_PLACEHOLDER); BaseExecutor325，不明白，为啥先放缓存
+                    ==> doQuery(ms, parameter, rowBounds, resultHandler, boundSql);
+
+                    ==> SimpleExecutor.doQuery(ms, parameter, rowBounds, resultHandler, boundSql); 58
+                        ==>Configuration configuration = ms.getConfiguration();   wrapper实际上就是CachingExecutor
+                        ==>StatementHandler handler = configuration.newStatementHandler(wrapper, ms, parameter, rowBounds, resultHandler, boundSql);
+                           ==> StatementHandler statementHandler = new RoutingStatementHandler(executor, mappedStatement, parameterObject, rowBounds, resultHandler, boundSql);
+                                虽然是RoutingStatementHandler，但是持有delegate，是PreparedStatementHandler，在创建PreparedStatementHandler
+                                的时候，会创建相应的parameterHandler，resultSetHandler；调用父类的BaseStatementHandler，加上Configuration辅助创建的
+                           ==> statementHandler = (StatementHandler) interceptorChain.pluginAll(statementHandler);
+                           statementHandler中抽取出Statement
+                        ==>Statement stmt = prepareStatement(statementHandler, ms.getStatementLog());
+                            ==> SimpleExecutor.prepareStatement(StatementHandler handler, Log statementLog)
+                                ==> Connection connection = getConnection(statementLog);
+                                    BaseExecutor337-343  交给JdbcTransaction去处理
+                                    Connection connection = transaction.getConnection();
+                                ==> Statement stmt = RoutingStatementHandler.prepare(connection, transaction.getTimeout());
+                                    委托给代理PreparedStatementhandler处理
+                                    ==> delegate.prepare(connection, transactionTimeout);
+                                    ==> 调用父类BaseStatementHandler.prepare(Connection connection, Integer transactionTimeout)
+                                        ==> ErrorContext.instance().sql(boundSql.getSql()); BaseStatementHandler85可以看到ErrorContext中的值了
+                                        BaseStatementHandler 97:throw new ExecutorException("Error preparing statement.  Cause: " + e, e);
+                                        ==> statement = instantiateStatement(connection);
+                                            PreparedStatementhandler可以获取到boundSql，boundSql中获取到sql，这个就可以获取到PreparedStatement了
+                                            ==> connection.prepareStatement(sql);
+                                        ==> setStatementTimeout(statement, transactionTimeout); statement设置超时时间，这个是数据库驱动的提供的
+                                        ==> setFetchSize(statement);
+
+                                ==> (RoutingStatementHandler)handler.parameterize(stmt);
+                                    委托给代理PreparedStatementhandler处理
+                                    PreparedStatementhandler.parameterize(Statement statement)
+                                    交给parameterHandler处理（ParameterHandler是创建StatementHandler时候创建的）
+                                    里面持有：typeHandlerRegistry,ms,parameterObject,boundSql,configuration
+                                    ==> parameterHandler.setParameters((PreparedStatement) statement);
+                                        ==> ErrorContext.instance().activity("setting parameters").object(mappedStatement.getParameterMap().getId()); DefaultParameterHandler63
+                                        ==> List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
+                                            遍历parameterMappings,获取参数的值
+                                        ==> TypeHandler typeHandler = parameterMapping.getTypeHandler();(UnknownTypeHandler类型class java.lang.Object)
+                                        ==> (UnknownTypeHandler)typeHandler.setParameter(ps, i + 1, value, jdbcType);
+                                            ==> (UnknownTypeHandler)BaseTypeHandler.setParameter(PreparedStatement ps, int i, T parameter, JdbcType jdbcType)
+                                            ==> (UnknownTypeHandler)BaseTypeHandler.setNonNullParameter(ps, i, parameter, jdbcType);
+                                                ==> UnknownTypeHandler.setNonNullParameter(PreparedStatement ps, int i, Object parameter, JdbcType jdbcType)
+                                                    ==> UnknownTypeHandler.resolveTypeHandler(Object parameter, JdbcType jdbcType)
+                                                        ==> (IntegerTypeHandler)handler = typeHandlerRegistry.getTypeHandler(parameter.getClass(), jdbcType);
+                                                ==> handler.setParameter(ps, i, parameter, jdbcType);
+                                                    ==> BaseTypeHandler.setParameter(PreparedStatement ps, int i, T parameter, JdbcType jdbcType)
+                                                    ==> IntegerTypeHandler.setNonNullParameter
+                                                        ==> ps.setInt(i, parameter);
+
+                            ==> (RoutingStatementHandler)handler.query(stmt, resultHandler);
+                                委托代理：delegate(PreparedStatementHandler)
+                                ==> delegate.query(statement, resultHandler);
+                                    ==> PreparedStatementHandler.query(Statement statement, ResultHandler resultHandler)
+                                    ==> ps.execute();
+                                    ==> (DefaultResultSetHandler)resultSetHandler.handleResultSets(ps);
+                                        ==> (DefaultResultSetHandler).handleResultSets(Statement stmt)
+                                           ==> ErrorContext.instance().activity("handling results").object(mappedStatement.getId());
+                                           ==> 将结果集处理好之后，放入到multipleResults（List<Object>型，可能是双层list）中
+
+                                <== List<E>
+                            <== List<E>
+                    <==doQuery
+                <==queryFromDatabase
+                localCache.putObject(key, list);
+            <==query
+        <==CacheExecutor.query
+    <==CacheExecutor.query
+<==DefaultSqlSession.selectList(statement, parameter, RowBounds.DEFAULT)
+<==DefaultSqlSession.selectList(String statement, Object parameter)
+<==DefaultSqlSession.selectOne(String statement, Object parameter)
+<==return list.get(0);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
