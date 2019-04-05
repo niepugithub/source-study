@@ -73,6 +73,8 @@ public class DefaultSqlSession implements SqlSession {
   @Override
   public <T> T selectOne(String statement, Object parameter) {
     // Popular vote was to return null on 0 results and throw exception on too many.
+    // 单个查询，还是依赖多个查询，其实不管多个还是单个，最终还是取决于sql语句返回的结果集
+    // 所以单个查询还是多个查询，可以服复用一套查询逻辑
     List<T> list = this.selectList(statement, parameter);
     if (list.size() == 1) {
       return list.get(0);

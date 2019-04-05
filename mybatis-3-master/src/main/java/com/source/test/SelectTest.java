@@ -11,6 +11,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 /**
  * @description:
@@ -34,11 +35,11 @@ public class SelectTest {
 
     @Test
     public void testSelectOne() {
-        Employee employee = sqlSession.selectOne(
+        List<Employee> employees = sqlSession.selectList(
                 "selectEmployeeById", 1);
-        System.out.println(employee);
+        System.out.println(employees);
 
-        employee = sqlSession.selectOne(
+        Employee employee = sqlSession.selectOne(
                 "selectEmployeeById", 1);
 
         System.out.println(employee);
