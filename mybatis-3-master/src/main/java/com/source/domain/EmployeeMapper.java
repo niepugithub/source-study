@@ -7,4 +7,5 @@ package com.source.domain;
  * @date:2019/4/5 13:54
  **/
 public interface EmployeeMapper {
+    Employee selectEmployeeById(long id);
 }

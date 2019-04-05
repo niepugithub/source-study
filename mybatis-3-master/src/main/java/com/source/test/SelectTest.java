@@ -1,6 +1,7 @@
 package com.source.test;
 
 import com.source.domain.Employee;
+import com.source.domain.EmployeeMapper;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -34,8 +35,15 @@ public class SelectTest {
     @Test
     public void testSelectOne() {
         Employee employee = sqlSession.selectOne(
-                "com.source.domain.EmployeeMapper.selectEmployeeById", 1);
+                "selectEmployeeById", 1);
         System.out.println(employee);
 
+    }
+
+    @Test
+    public void testMapperSelectEmployeeById() {
+        EmployeeMapper mapper = sqlSession.getMapper(EmployeeMapper.class);
+        Employee employee = mapper.selectEmployeeById(1);
+        System.out.println(employee);
     }
 }
