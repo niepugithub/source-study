@@ -185,7 +185,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
 
     int resultSetCount = 0;
     ResultSetWrapper rsw = getFirstResultSet(stmt);
-
+    // 一条查询语句中还可以写多个resultMap，这个平时到没有用到这么高级的特性
     List<ResultMap> resultMaps = mappedStatement.getResultMaps();
     int resultMapCount = resultMaps.size();
     validateResultMapsCount(rsw, resultMapCount);

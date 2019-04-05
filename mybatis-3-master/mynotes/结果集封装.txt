@@ -1,0 +1,16 @@
+
+DefaultResultSetHandler.handleResultSets
+    final List<Object> multipleResults = new ArrayList<>();
+    DefaultResultSetHandler.handleResultSet
+        DefaultResultSetHandler.handleRowValues(ResultSetWrapper , RresultMap, resultHandler, rowBounds, resultMapping)
+            DefaultResultSetHandler.handleRowValuesForSimpleResultMap
+                DefaultResultSetHandler.getRowValue(rsw, discriminatedResultMap, null);
+                    rowValue javabean的默认构造器所创建，被metaObject进行封装，对于metaObject属性的修改，会作用到rowValue上
+                    final MetaObject metaObject = configuration.newMetaObject(rowValue);
+                    DefaultResultSetHandler.applyAutomaticMappings(rsw, resultMap, metaObject, columnPrefix)
+                    // 将获取到的值添加到resultHandler中，当前一条记录保存在resultContext中
+                DefaultResultSetHandler.storeObject(resultHandler, resultContext, rowValue, parentMapping, resultSet);
+    // 一条查询语句中还可以写多个resultMap，这个平时到没有用到这么高级的特性；
+    // 平时用到的就一个resultMap，可能含有多条记录；但是multipleResults长度是1
+    multipleResults.add(defaultResultHandler.getResultList());
+

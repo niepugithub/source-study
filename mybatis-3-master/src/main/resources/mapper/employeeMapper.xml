@@ -6,4 +6,8 @@
     <select id="selectEmployeeById" resultType="Employee">
         select * from employee where id = #{id}
     </select>
+
+    <select id="selectEmployeeByGender" resultType="Employee">
+        select * from employee where gender = #{gender}
+    </select>
 </mapper>

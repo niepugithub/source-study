@@ -52,4 +52,16 @@ public class SelectTest {
         Employee employee = mapper.selectEmployeeById(1);
         System.out.println(employee);
     }
+
+    @Test
+    public void testSelectList(){
+        List<Employee> employees = sqlSession.selectList(
+                "selectEmployeeByGender", "男");
+        System.out.println(employees);
+
+        List<Employee> employee = sqlSession.selectOne(
+                "selectEmployeeByGender", "男");
+
+        System.out.println(employee);
+    }
 }
