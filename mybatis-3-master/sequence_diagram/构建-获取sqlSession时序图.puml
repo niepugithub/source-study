@@ -1,0 +1,22 @@
+@startuml
+'定义一个actor，然后再使用
+actor actor
+actor -> SqlSessionFactoryBuilder
+SqlSessionFactoryBuilder -> SqlSessionFactoryBuilder: new SqlSessionFactoryBuilder()
+SqlSessionFactoryBuilder -> SqlSessionFactoryBuilder: build(InputStream)
+SqlSessionFactoryBuilder -> XMLConfigBuilder: new XMLConfigBuilder()
+XMLConfigBuilder -> Configuration: new Configuration()
+XMLConfigBuilder --> XMLConfigBuilder: parse()
+XMLConfigBuilder --> XMLConfigBuilder: parseConfiguration()
+XMLConfigBuilder --> XMLConfigBuilder: environmentsElement()
+XMLConfigBuilder --> XMLConfigBuilder: typeHandlerElement()
+XMLConfigBuilder --> XMLConfigBuilder: mapperElement()
+XMLConfigBuilder --> XMLConfigBuilder: mapperElement()
+Configuration -> XMLMapperBuilder: new XMLMapperBuilder()
+XMLMapperBuilder -> XMLMapperBuilder: parse()
+XMLMapperBuilder -> Configuration: mappers
+Configuration -> Configuration: addMappers()
+SqlSessionFactoryBuilder -> SqlSessionFactoryBuilder: build(Configuration)
+actor <- SqlSessionFactoryBuilder: SqlSessionFactory
+
+@enduml
