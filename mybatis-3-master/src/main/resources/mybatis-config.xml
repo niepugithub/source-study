@@ -5,6 +5,7 @@
 <configuration>
     <settings>
         <setting name="cacheEnabled" value="true"/>
+        <setting name="defaultFetchSize" value="5"/>
     </settings>
     <typeAliases>
         <package name="com.source.domain"/>
