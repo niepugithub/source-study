@@ -1,0 +1,28 @@
+
+二级缓存开启：
+        <cache
+                eviction="FIFO"
+                flushInterval="60000"
+                size="512"
+                readOnly="true"/>
+        <cache-ref namespace="com.source.domain.EmployeeMapper"/>
+
+二级缓存开启后，会赋值给ms中的cache，如果没有开启，cache=null，开启了SynchronizedCache缓存
+
+CachingExecutor.query方法会执行，判断是否有二级缓存
+
+query(MappedStatement ms, Object parameterObject, RowBounds rowBounds,
+    ResultHandler resultHandler, CacheKey key, BoundSql boundSql)
+一级缓存：
+    CachingExecutor.query方法会执行，判断是否有二级缓存，有二级缓存直接从二级缓存中查，不使用一级缓存了？
+    似乎不是上面所说。二级缓存存了感觉没用上，还是会进行第二次查询
+    delegate.query(ms, parameterObject, rowBounds, resultHandler, key, boundSql);
+    不过幸好，第二次查询，会用到一级缓存，所以虽然二级缓存没有命中，但是一级缓存，命中了
+
+
+不管有无二级缓存，CachingExecutor还是会创建的，封装了simpleExecutor
+
+
+
+
+
