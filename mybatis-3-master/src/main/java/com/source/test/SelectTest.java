@@ -65,5 +65,13 @@ public class SelectTest {
         System.out.println(employee);
     }
 
-
+    @Test
+    public void testInsert() {
+        Employee employee = new Employee("insert用户", "zhSan@qq.com", "男", 2, "LOGIN");
+        int i = sqlSession.insert("addEmployee", employee);
+        sqlSession.commit();
+        System.out.println(i);
+        System.out.println(employee);
+        // 插入数据，这里记得手动提交事务，否则还可能会出现返回插入成功，但是数据库中没数据的情况
+    }
 }

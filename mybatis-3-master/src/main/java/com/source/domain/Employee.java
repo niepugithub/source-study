@@ -27,6 +27,14 @@ public class Employee {
         this.empStatus = empStatus;
     }
 
+    public Employee(String lastName, String email, String gender, long did, String empStatus) {
+        this.lastName = lastName;
+        this.email = email;
+        this.gender = gender;
+        this.did = did;
+        this.empStatus = empStatus;
+    }
+
     public Employee() {
     }
 }

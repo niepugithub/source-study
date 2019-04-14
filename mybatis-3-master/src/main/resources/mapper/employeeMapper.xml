@@ -11,6 +11,11 @@
         select * from employee where gender = #{gender}
     </select>
 
+    <!--使用主键生成策略的时候记得指定keyProperty-->
+    <insert id="addEmployee" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO employee(last_name,email,gender,did,empStatus)
+        values(#{lastName},#{email},#{gender},#{did},#{empStatus})
+    </insert>
 
     <cache
             eviction="FIFO"
