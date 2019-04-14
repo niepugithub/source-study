@@ -11,6 +11,22 @@
         select * from employee where gender = #{gender}
     </select>
 
+    <!--动态sql,查询如果没有resultType或者resultMap是不行的-->
+    <select id="dynamicQueryEmployee" resultType="Employee">
+        SELECT * FROM employee
+        <where>
+            <if test="gender != null">
+                gender = #{gender}
+            </if>
+            <if test="lastName != null">
+                AND last_name like #{lastName}
+            </if>
+            <if test="did != null">
+                AND did = #{did}
+            </if>
+        </where>
+    </select>
+
     <!--使用主键生成策略的时候记得指定keyProperty-->
     <insert id="addEmployee" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO employee(last_name,email,gender,did,empStatus)
