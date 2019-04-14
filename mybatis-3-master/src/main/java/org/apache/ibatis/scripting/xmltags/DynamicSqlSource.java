@@ -36,9 +36,14 @@ public class DynamicSqlSource implements SqlSource {
   @Override
   public BoundSql getBoundSql(Object parameterObject) {
     DynamicContext context = new DynamicContext(configuration, parameterObject);
+    // context中的SqlBuilder在下面执行前是""，执行后是
+    //        SELECT * FROM employee
+    //         WHERE gender = #{gender}
+    //    AND did = #{did}
     rootSqlNode.apply(context);
     SqlSourceBuilder sqlSourceParser = new SqlSourceBuilder(configuration);
     Class<?> parameterType = parameterObject == null ? Object.class : parameterObject.getClass();
+    // 动态解析得到的sql语句中的#{}会被替换成?
     SqlSource sqlSource = sqlSourceParser.parse(context.getSql(), parameterType, context.getBindings());
     BoundSql boundSql = sqlSource.getBoundSql(parameterObject);
     // context.getBindings得到的一个真正的方法入参，一个是databaseId
