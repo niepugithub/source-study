@@ -1,13 +1,26 @@
 
-Executor的创建时间：
+SqlSource:事先创建好，执行时候使用。XmlStatementBuilder.parseStatementNode节点，由
+    langDriver.createSqlSource(configuration, context, parameterTypeClass);
+    交给ms处理，ms又交给了configuration
 
-BoundSql的创建时间：
+Executor的创建时间：defaultSqlSessionFactory创建sqlSession的时候，由configuration创建，并且将executor交给sqlSession管理
 
-StatementHandler创建时间：
+由于是先创建DefaultSqlSessionFactory，再创建sqlSession，所以sqlSource先与executor创建，并且
+executor是sqlSession级别，sqlSource是全局级别
+
+BoundSql的创建时间：执行查询的时候创建的；
+    ms.getBoundSql(parameter);
+    sqlSource.getBoundSql(parameterObject);
+
+StatementHandler创建时间：executor.query
+                ms.getConfiguration();
+                configuration.newStatementHandler()
+                prepareStatement(handler, ms.getStatementLog());
+                prepareStatement包括ps参数处理，timeout设置等；
+                因此statementHandler晚于boundSql创建
 
 ParameterHandler创建时间：BaseStatementHandler构造器中创建configuration.newParameterHandler
                          给ParameterHandler传递了参数boundSql参数
-
 ResultSetHandler创建时间：BaseStatementHandler构造器中创建configuration.newResultSetHandler
 
 
