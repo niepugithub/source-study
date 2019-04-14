@@ -37,10 +37,11 @@ public class XMLLanguageDriver implements LanguageDriver {
   public ParameterHandler createParameterHandler(MappedStatement mappedStatement, Object parameterObject, BoundSql boundSql) {
     return new DefaultParameterHandler(mappedStatement, parameterObject, boundSql);
   }
-
+  // 被解析节点的信息保存在XNode script中，也叫节点context
   @Override
   public SqlSource createSqlSource(Configuration configuration, XNode script, Class<?> parameterType) {
     XMLScriptBuilder builder = new XMLScriptBuilder(configuration, script, parameterType);
+    // 这里会创建出RawSqlSource或者DynamicSQLSource对象
     return builder.parseScriptNode();
   }
 

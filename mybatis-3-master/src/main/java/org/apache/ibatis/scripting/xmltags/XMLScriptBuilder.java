@@ -44,10 +44,10 @@ public class XMLScriptBuilder extends BaseBuilder {
   }
 
   public XMLScriptBuilder(Configuration configuration, XNode context, Class<?> parameterType) {
-    super(configuration);
+    super(configuration);// BaseBuilder构造器
     this.context = context;
     this.parameterType = parameterType;
-    initNodeHandlerMap();
+    initNodeHandlerMap();// 初始动态sql处理器
   }
 
 
@@ -64,6 +64,7 @@ public class XMLScriptBuilder extends BaseBuilder {
   }
 
   public SqlSource parseScriptNode() {
+    // 解析当前节点是否是动态的sql，如果不是则创建RawSQLSource信息
     MixedSqlNode rootSqlNode = parseDynamicTags(context);
     SqlSource sqlSource;
     if (isDynamic) {

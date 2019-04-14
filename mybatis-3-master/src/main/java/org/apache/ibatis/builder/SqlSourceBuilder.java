@@ -38,11 +38,11 @@ public class SqlSourceBuilder extends BaseBuilder {
   public SqlSourceBuilder(Configuration configuration) {
     super(configuration);
   }
-
+  // originalSql:select * from employee where id = #{id}
   public SqlSource parse(String originalSql, Class<?> parameterType, Map<String, Object> additionalParameters) {
     ParameterMappingTokenHandler handler = new ParameterMappingTokenHandler(configuration, parameterType, additionalParameters);
     GenericTokenParser parser = new GenericTokenParser("#{", "}", handler);
-    String sql = parser.parse(originalSql);
+    String sql = parser.parse(originalSql);// sql:select * from employee where id = ?
     return new StaticSqlSource(configuration, sql, handler.getParameterMappings());
   }
 

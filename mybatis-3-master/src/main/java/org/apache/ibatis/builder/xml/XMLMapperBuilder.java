@@ -137,7 +137,7 @@ public class XMLMapperBuilder extends BaseBuilder {
   }
 
   private void buildStatementFromContext(List<XNode> list, String requiredDatabaseId) {
-    for (XNode context : list) {
+    for (XNode context : list) {// 这里给XMLStatementBuilder传递了节点context，即当前解析节点信息
       final XMLStatementBuilder statementParser = new XMLStatementBuilder(configuration, builderAssistant, context, requiredDatabaseId);
       try {
         statementParser.parseStatementNode();
