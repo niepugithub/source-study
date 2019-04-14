@@ -1,0 +1,22 @@
+
+如何整合jdbc?
+(1)获取数据源：XmlConfigBuilder#parseConfiguration ==> environmentElement ==> datasourceElement
+(2)获取connection以及参数设置：transaction获取connection，通过数据源获取，然后设置事务级别，auto-commit模式
+
+(3)statementHandler初始化
+    BaseStatementHandler#prepare方法，获取ps，ps的参数设置，设置超时时间，fetchSize等
+
+
+如何整合spring?
+(1)SqlSessionFactoryBean
+    创建sqlSessionFactory对象
+    如果有configuration配置文件，则按照配置创建configuration对象
+    如果没有配置文件，则创建一个空的configuration对象
+    给configuration对象设置一些值
+
+(2)MapperScannerConfigurer
+    扫描mapper接口
+(3)SqlSessionTemplate
+(4)MapperFactoryBean
+    configuration中添加mapperInterface
+(5)SpringManagedTransactionFactory
