@@ -1,0 +1,8 @@
+
+SqlSourceBuilder：parse返回staticSqlSource
+
+ms.getBoundSql ==> SqlSource.getBoundSql
+
+DynamicSqlSource#getBoundSql会使用SqlSourceBuilder创建StaticBoundSql，
+然后调用StaticBoundSql#getBoundSql方法
+

@@ -32,7 +32,7 @@ public class DynamicSqlSource implements SqlSource {
     this.configuration = configuration;
     this.rootSqlNode = rootSqlNode;
   }
-
+  // 这里是DynamicSqlSource，经过sqlSourceParser.parse方法解析得到静态的StaticSqlSource
   @Override
   public BoundSql getBoundSql(Object parameterObject) {
     DynamicContext context = new DynamicContext(configuration, parameterObject);
@@ -41,6 +41,7 @@ public class DynamicSqlSource implements SqlSource {
     Class<?> parameterType = parameterObject == null ? Object.class : parameterObject.getClass();
     SqlSource sqlSource = sqlSourceParser.parse(context.getSql(), parameterType, context.getBindings());
     BoundSql boundSql = sqlSource.getBoundSql(parameterObject);
+    // context.getBindings得到的一个真正的方法入参，一个是databaseId
     context.getBindings().forEach(boundSql::setAdditionalParameter);
     return boundSql;
   }

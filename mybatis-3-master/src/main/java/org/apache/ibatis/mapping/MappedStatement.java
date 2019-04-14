@@ -292,7 +292,7 @@ public final class MappedStatement {
   public String[] getResulSets() {
     return resultSets;
   }
-
+  // DynamicSqlSource#getBoundSql会创建StaticBoundSql，然后调用StaticBoundSql#getBoundSql方法
   public BoundSql getBoundSql(Object parameterObject) {
     BoundSql boundSql = sqlSource.getBoundSql(parameterObject);
     List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
