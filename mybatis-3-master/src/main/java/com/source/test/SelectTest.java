@@ -54,14 +54,16 @@ public class SelectTest {
     }
 
     @Test
-    public void testSelectList(){
+    public void testSelectList() {
         List<Employee> employees = sqlSession.selectList(
                 "selectEmployeeByGender", "男");
         System.out.println(employees);
 
-        List<Employee> employee = sqlSession.selectOne(
+        List<Employee> employee = sqlSession.selectList(
                 "selectEmployeeByGender", "男");
 
         System.out.println(employee);
     }
+
+
 }

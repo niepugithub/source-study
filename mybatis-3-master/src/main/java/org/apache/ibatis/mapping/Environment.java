@@ -42,6 +42,7 @@ public final class Environment {
     this.dataSource = dataSource;
   }
 
+  // Environment中的Builder，建造者模式，构建得到Environment对象
   public static class Builder {
     private String id;
     private TransactionFactory transactionFactory;

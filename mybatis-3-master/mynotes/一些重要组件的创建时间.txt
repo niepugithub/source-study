@@ -1,0 +1,13 @@
+
+Executor的创建时间：
+
+BoundSql的创建时间：
+
+StatementHandler创建时间：
+
+ParameterHandler创建时间：BaseStatementHandler构造器中创建configuration.newParameterHandler
+                         给ParameterHandler传递了参数boundSql参数
+
+ResultSetHandler创建时间：BaseStatementHandler构造器中创建configuration.newResultSetHandler
+
+

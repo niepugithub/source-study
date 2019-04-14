@@ -50,6 +50,10 @@ import org.apache.ibatis.io.Resources;
 /**
  * @author Clinton Begin
  * @author Kazuki Shimizu
+ *
+ * TypeHandler负责处理入参和结果集，所以定义了一setParameter()和三个getResult()方法
+ *
+ *
  */
 public final class TypeHandlerRegistry {
 

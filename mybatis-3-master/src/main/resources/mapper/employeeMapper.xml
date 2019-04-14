@@ -10,4 +10,13 @@
     <select id="selectEmployeeByGender" resultType="Employee">
         select * from employee where gender = #{gender}
     </select>
+
+
+    <cache
+            eviction="FIFO"
+            flushInterval="60000"
+            size="512"
+            readOnly="true"/>
+    <cache-ref namespace="com.source.domain.EmployeeMapper"/>
+
 </mapper>

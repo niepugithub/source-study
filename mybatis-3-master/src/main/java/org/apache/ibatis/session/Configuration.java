@@ -177,6 +177,8 @@ public class Configuration {
   }
 
   public Configuration() {
+
+    // 创建Configuration的时候自动添加框架自身的别名处理
     typeAliasRegistry.registerAlias("JDBC", JdbcTransactionFactory.class);
     typeAliasRegistry.registerAlias("MANAGED", ManagedTransactionFactory.class);
 
@@ -779,6 +781,7 @@ public class Configuration {
   }
 
   public void addCacheRef(String namespace, String referencedNamespace) {
+    // 当前命名空间缓存所在的位置在：referencedNameSpace中
     cacheRefMap.put(namespace, referencedNamespace);
   }
 

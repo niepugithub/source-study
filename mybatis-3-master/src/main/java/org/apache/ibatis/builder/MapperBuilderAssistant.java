@@ -108,6 +108,10 @@ public class MapperBuilderAssistant extends BaseBuilder {
     }
     try {
       unresolvedCacheRef = true;
+//      <cache-ref namespace=""/>这里的nameSpace是cache-ref中的，也就是老早会放入到configuration中的？
+      // 这么去获取，不是应该肯定是null吗？啥时候将缓存放进去的？？主配置文件中吗？
+      //TODO 这里的cache-ref中的缓存啥时候存入configuration对象的？
+//      https://www.cnblogs.com/jabnih/p/5705565.html
       Cache cache = configuration.getCache(namespace);
       if (cache == null) {
         throw new IncompleteElementException("No cache for namespace '" + namespace + "' could be found.");

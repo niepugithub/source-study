@@ -75,7 +75,7 @@ public class CachingExecutor implements Executor {
     flushCacheIfRequired(ms);
     return delegate.update(ms, parameterObject);
   }
-
+  // 这里开始创建boundSql，因为boundSql需要拿来创建CacheKey
   @Override
   public <E> List<E> query(MappedStatement ms, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler) throws SQLException {
     BoundSql boundSql = ms.getBoundSql(parameterObject);

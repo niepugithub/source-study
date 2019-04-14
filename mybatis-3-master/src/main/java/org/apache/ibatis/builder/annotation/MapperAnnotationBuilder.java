@@ -135,6 +135,9 @@ public class MapperAnnotationBuilder {
       for (Method method : methods) {
         try {
           // issue #237
+          // 桥方法，是泛型中创建出来的，p202中可以看到详细内容；
+          // 子类继承抽象泛型父类，则子类覆盖的方法中有两个同名方法，一个是自己定义的真实方法
+          // 这个方法是被桥方法，一个是Object型参数（为了匹配泛型），这个方法就是桥方法
           if (!method.isBridge()) {
             parseStatement(method);
           }

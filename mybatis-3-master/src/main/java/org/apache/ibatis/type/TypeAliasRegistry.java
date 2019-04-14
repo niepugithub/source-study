@@ -132,6 +132,8 @@ public class TypeAliasRegistry {
     for (Class<?> type : typeSet) {
       // Ignore inner classes and interfaces (including package-info.java)
       // Skip also inner classes. See issue #6
+      // 成员类就是成员内部类的意思，static class就是静态内部类的意思
+      // https://blog.csdn.net/qq_30021219/article/details/82661528
       if (!type.isAnonymousClass() && !type.isInterface() && !type.isMemberClass()) {
         registerAlias(type);
       }
@@ -141,6 +143,7 @@ public class TypeAliasRegistry {
   public void registerAlias(Class<?> type) {
     String alias = type.getSimpleName();
     Alias aliasAnnotation = type.getAnnotation(Alias.class);
+    // 注解优先于配置中的别名
     if (aliasAnnotation != null) {
       alias = aliasAnnotation.value();
     }

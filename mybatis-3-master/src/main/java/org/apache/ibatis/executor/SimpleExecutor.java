@@ -33,6 +33,8 @@ import org.apache.ibatis.transaction.Transaction;
 
 /**
  * @author Clinton Begin
+ *
+ * SimpleExecutor只实现了BaseExecutor的虚方法，大部分功能还是BaseExecutor中实现的
  */
 public class SimpleExecutor extends BaseExecutor {
 
@@ -52,7 +54,7 @@ public class SimpleExecutor extends BaseExecutor {
       closeStatement(stmt);
     }
   }
-
+  // 这里创建的StatementHandler，哪里开始创建的boundSql呢？
   @Override
   public <E> List<E> doQuery(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) throws SQLException {
     Statement stmt = null;
@@ -79,7 +81,7 @@ public class SimpleExecutor extends BaseExecutor {
   public List<BatchResult> doFlushStatements(boolean isRollback) {
     return Collections.emptyList();
   }
-
+  // Executor是一开始获取DefaultSqlSession就准备好的；
   private Statement prepareStatement(StatementHandler handler, Log statementLog) throws SQLException {
     Statement stmt;
     Connection connection = getConnection(statementLog);

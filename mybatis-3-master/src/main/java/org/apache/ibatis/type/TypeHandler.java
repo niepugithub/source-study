@@ -22,6 +22,9 @@ import java.sql.SQLException;
 
 /**
  * @author Clinton Begin
+ *
+ * TypeHandler负责处理入参和结果集，所以定义了一setParameter()和三个getResult()方法
+ *
  */
 public interface TypeHandler<T> {
 

@@ -95,7 +95,10 @@ public class XMLMapperBuilder extends BaseBuilder {
       configuration.addLoadedResource(resource);
       bindMapperForNamespace();
     }
-
+    // 在解析失败的情况下重试加载（同步操作，仅一次）
+    // 这里搞得鬼啊；如果下面的缓存cache-ref与cache换位置，则不会报错
+    // 则就没有pendingCacheRefs，所以就看到断点处代码只执行一次
+    // MapperBuilderAssistant 115 Cache cache = configuration.getCache(namespace);
     parsePendingResultMaps();
     parsePendingCacheRefs();
     parsePendingStatements();
@@ -112,11 +115,14 @@ public class XMLMapperBuilder extends BaseBuilder {
         throw new BuilderException("Mapper's namespace cannot be empty");
       }
       builderAssistant.setCurrentNamespace(namespace);
-      cacheRefElement(context.evalNode("cache-ref"));
+      // 自己将下面两行代码换下执行顺序，发现虽然启动时候没报错，但是实际查询的时候却没有用到缓存
+      // 与源码中cache-ref先执行
       cacheElement(context.evalNode("cache"));
+      cacheRefElement(context.evalNode("cache-ref"));
       parameterMapElement(context.evalNodes("/mapper/parameterMap"));
       resultMapElements(context.evalNodes("/mapper/resultMap"));
       sqlElement(context.evalNodes("/mapper/sql"));
+      // 到这里，剩下crud四个标签没有解析了，这里交给XMLStatementBuilder得到ms，设置到configuration中
       buildStatementFromContext(context.evalNodes("select|insert|update|delete"));
     } catch (Exception e) {
       throw new BuilderException("Error parsing Mapper XML. The XML location is '" + resource + "'. Cause: " + e, e);
@@ -187,17 +193,30 @@ public class XMLMapperBuilder extends BaseBuilder {
   }
 
   private void cacheRefElement(XNode context) {
+//    <cache-ref namespace=""/>
     if (context != null) {
+      // 这两个nameSpace,第二个是cache-ref的命名空间
       configuration.addCacheRef(builderAssistant.getCurrentNamespace(), context.getStringAttribute("namespace"));
       CacheRefResolver cacheRefResolver = new CacheRefResolver(builderAssistant, context.getStringAttribute("namespace"));
       try {
         cacheRefResolver.resolveCacheRef();
+        // 上面第一次肯定是抛异常啊MapperBuilderAssistant 118行
       } catch (IncompleteElementException e) {
         configuration.addIncompleteCacheRef(cacheRefResolver);
       }
     }
   }
 
+  // 这里加载缓存配置
+
+  /*
+  * <cache
+  *   eviction="FIFO"
+  *   flushInterval="60000"
+  *   size="512"
+  *   readOnly="true"/>
+  *
+  * */
   private void cacheElement(XNode context) {
     if (context != null) {
       String type = context.getStringAttribute("type", "PERPETUAL");
@@ -239,6 +258,7 @@ public class XMLMapperBuilder extends BaseBuilder {
     }
   }
 
+  // 可能哟多个resultMap
   private void resultMapElements(List<XNode> list) throws Exception {
     for (XNode resultMapNode : list) {
       try {

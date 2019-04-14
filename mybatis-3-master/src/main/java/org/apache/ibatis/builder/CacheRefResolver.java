@@ -29,6 +29,9 @@ public class CacheRefResolver {
     this.cacheRefNamespace = cacheRefNamespace;
   }
 
+  // 真正缓存的命名空间，也就是<cache-ref namespace=""/>中的命名空间
+  // 而assistant保存了当前命名空间，这样缓存就对应起来了；
+  // 当前命名空间需要cache-ref中命名空间的缓存
   public Cache resolveCacheRef() {
     return assistant.useCacheRef(cacheRefNamespace);
   }

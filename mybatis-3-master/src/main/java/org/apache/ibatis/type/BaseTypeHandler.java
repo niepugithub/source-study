@@ -34,6 +34,11 @@ import org.apache.ibatis.session.Configuration;
  * @author Clinton Begin
  * @author Simone Tripodi
  * @author Kzuki Shimizu
+ *
+ *
+ * 类型处理器继承自这个抽象模板类BaseTypeHandler，处理异常并进行空值判断，具体的类型转换交给子类
+ *
+ *
  */
 public abstract class BaseTypeHandler<T> extends TypeReference<T> implements TypeHandler<T> {
 
