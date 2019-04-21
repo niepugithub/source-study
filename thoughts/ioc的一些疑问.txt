@@ -1,6 +1,12 @@
 (1)什么是loadBeanDefinitions
-AbstractApplicationContext#obtainFreshBeanFactory()#refreshBeanFactory()
-AbstractRefreshableApplicationContext#refreshBeanFactory()#loadBeanDefinitions(beanFactory)
+似乎是XML版是这样的，对于注解版beanFactory到这里，早已经创建OK了
+AbstractApplicationContext
+    #obtainFreshBeanFactory()
+    #refreshBeanFactory()
+AbstractRefreshableApplicationContext
+    #refreshBeanFactory()
+    beanFactory = createBeanFactory()
+    #loadBeanDefinitions(beanFactory)
 模板方法，有很多种子类实现loadBeanDefinitions，加个DB
 
 loadBeanDefinition ==> doLoadBeanDefinition ==> registryBeanDefinition ==> doRegistryBeanDefinition
