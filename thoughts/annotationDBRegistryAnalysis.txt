@@ -1,0 +1,90 @@
+
+核心类有：
+AnnotatedBeanDefinitionReader
+ClassPathBeanDefinitionScanner
+负责解析注册类的DB
+
+ConfigurationClassBeanDefinitionReader
+负责解析@Configuration注解类的DB
+
+ConfigurationClassPostProcessor
+负责处理@Configuration注解类内部其他注解比如@Bean等信息
+
+AutowiredAnnotationBeanPostProcessor
+负责解析@Autowired 、@Value等
+
+ConfigutationClassParse
+
+
+(1)注解版的BD什么时候注册的？
+不是XML那样的obtainFreshBeanFactory，而要比这个晚
+
+代码执行到此时，BDMap中有8个值其中一个是启动类
+
+AbstractApplicationContext#invokeBeanFactoryPostProcessors(beanFactory);
+PostProcessorRegistrationDelegate#invokeBeanFactoryPostProcessors(beanFactory, getBeanFactoryPostProcessors());
+PostProcessorRegistrationDelegate#invokeBeanDefinitionRegistryPostProcessors(currentRegistryProcessors, registry)
+ConfigurationClassPostProcessor#postProcessBeanDefinitionRegistry(registry)
+
+ConfigurationClassPostProcessor这个对象在BF中的名字叫做
+org.springframework.context.annotation.internalConfigurationAnnotationProcessor
+
+ConfigurationClassPostProcessor#processConfigBeanDefinitions(registry)
+    找到具有@Configuration注解的BD：configCandidates.add(new BeanDefinitionHolder(beanDef, beanName))
+    从8个BD中找@Configuration注解的，只有启动类满足条件;
+    将得到的@Configuration类排序
+    接着new ConfigurationClassParser
+
+    ConfigurationClassParser.parse上面的@Configuration注解类
+
+{会得到有Configuration或者Controller等注解的BD，注意，此时@Configuration类中的其他@Bean注解等修改的
+类还不会注册到BDMap中}
+
+解析主类
+ConfigurationClassParser.processConfigurationClass(new ConfigurationClass(metadata, beanName))
+ConfigurationClassParser.doProcessConfigurationClass(configClass, sourceClass)
+
+获取注解上ComponentScan等，使用ConfigurationClassParser*componentScanParser解析，
+得到@Controller和@Configuration注解的类
+
+componentScanParser.parse解析：scanner = new ClassPathBeanDefinitionScanner()
+    scanner.doScan(StringUtils.toStringArray(basePackages))
+    registerBeanDefinition(definitionHolder, this.registry)
+
+接着回到ConfigurationClassParser.processConfigurationClass(new ConfigurationClass(metadata, beanName))
+    这里的configClasses配置文件有很多，包括所有的AutoConfiguration类，ConfigurationClassParser类中获取到
+    ConfigurationClassParser是ConfigurationClassParser在new的时候并没有初始化configurationClasses属性；
+    而是parser.parse(candidates)的时候得到的66个configurationClasses属性值，全是自动配置类
+    在parser.parse方法的末尾有一个processDeferredImportSelectors();这个方法获取到66-3个自动配置类
+    3个是我自己的，主类，controller类，自定义的@Configuration类，由processDeferredImportSelectors()
+    之前就已经完成好的了；
+
+    parser*deferredImportSelectors属性值是AutoConfiguration，它是什么时候附上值的呢？
+    是parser.processImports()时候附上值的，三个类，依次循环，直到找到@Import类，即主类
+    ImportSelector selector = BeanUtils.instantiateClass(candidateClass, ImportSelector.class);
+
+    是解析主配置类得到的AutoConfigurationImportSelector
+
+    ConfigurationClassBeanDefinitionReader.loadBeanDefinitions(configClasses)
+    ConfigurationClassBeanDefinitionReader.loadBeanDefinitionsForConfigurationClass(configClass, trackedConditionEvaluator)
+        if (configClass.isImported()) {
+    		registerBeanDefinitionForImportedConfigurationClass(configClass);
+    	}
+    	for (BeanMethod beanMethod : configClass.getBeanMethods()) {
+    		loadBeanDefinitionsForBeanMethod(beanMethod);
+    	}
+        loadBeanDefinitionsFromImportedResources(configClass.getImportedResources());
+        loadBeanDefinitionsFromRegistrars(configClass.getImportBeanDefinitionRegistrars())
+
+
+
+
+
+
+
+
+
+
+
+
+
