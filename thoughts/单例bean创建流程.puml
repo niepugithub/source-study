@@ -1,0 +1,34 @@
+@startuml
+actor actor
+
+actor -> AbstractApplicationContext
+AbstractApplicationContext -> AbstractApplicationContext: refresh()
+AbstractApplicationContext -> AbstractApplicationContext: beanFactory = obtainFreshBeanFactory()
+AbstractApplicationContext -> AbstractApplicationContext: registerBeanPostProcessors(beanFactory),共10个
+'重点关注这个internalAutoProxyCreator；10个分为3类，什么Ordered，PriorityOrdered，internal
+'分类后排序，排序后注册，orderedPostProcessors包含internalAutoProxyCreator
+AbstractApplicationContext -> AbstractApplicationContext: registerBeanPostProcessors(beanFactory, orderedPostProcessors)
+'存储在DefaulListableBeanFactor的beanPostProcessors集合list中
+AbstractApplicationContext -> DefaultListableBeanFactory: addBeanPostProcessor(beanPostProcessor)
+AbstractApplicationContext -> DefaultListableBeanFactory: initApplicationEventMulticaster()
+'这里加个applicationEventMultiCaster方便知道注册事件分发器流程
+AbstractApplicationContext -> DefaultListableBeanFactory: registerSingleton(beanName, singletonObject)
+'Instantiate all remaining (non-lazy-init) singletons
+AbstractApplicationContext -> AbstractApplicationContext: finishBeanFactoryInitialization(beanFactory)
+AbstractApplicationContext -> DefaultListableBeanFactory: preInstantiateSingletons()
+DefaultListableBeanFactory -> AbstractBeanFactory: getBean(beanName)
+AbstractBeanFactory -> AbstractBeanFactory: doGetBean(name, null, null, false)
+AbstractBeanFactory -> DefaultSingletonBeanRegistry: getSingleton(beanName)
+DefaultSingletonBeanRegistry -> singletonFactory: getObject()
+singletonFactory -> AbstractAutowireCapableBeanFactory: createBean(beanName, mbd, args)
+'这里进行代理对象的创建，但是对于我的controller事务控制器没起作用
+AbstractAutowireCapableBeanFactory -> AbstractAutowireCapableBeanFactory: 这里也可能创建代理resolveBeforeInstantiation(beanName, mbdToUse)
+AbstractAutowireCapableBeanFactory -> AbstractAutowireCapableBeanFactory: doCreateBean(beanName, mbdToUse, args)
+AbstractAutowireCapableBeanFactory -> AbstractAutowireCapableBeanFactory: createBeanInstance(beanName, mbd, args)
+AbstractAutowireCapableBeanFactory -> AbstractAutowireCapableBeanFactory: instantiateBean(beanName, mbd)
+AbstractAutowireCapableBeanFactory -> SimpleInstantiationStrategy: instantiateBean(beanName, mbd)
+'这里执行了代理创建
+AbstractAutowireCapableBeanFactory -> AbstractAutowireCapableBeanFactory: 代理exposedObject = initializeBean(beanName, exposedObject, mbd)
+SimpleInstantiationStrategy -> BeanUtils: instantiateClass(constructorToUse)
+
+@enduml

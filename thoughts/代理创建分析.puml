@@ -1,0 +1,16 @@
+@startuml
+'这里执行了代理创建
+AbstractAutowireCapableBeanFactory -> AbstractAutowireCapableBeanFactory: exposedObject = initializeBean(beanName, exposedObject, mbd)
+AbstractAutowireCapableBeanFactory -> AbstractAutowireCapableBeanFactory: applyBeanPostProcessorsAfterInitialization(wrappedBean, beanName)
+AbstractAutowireCapableBeanFactory -> AbstractAutoProxyCreator:postProcessAfterInitialization
+AbstractAutoProxyCreator -> AbstractAutoProxyCreator:wrapIfNecessary(bean, beanName, cacheKey)
+AbstractAutoProxyCreator -> AbstractAutoProxyCreator:createProxy(bean.getClass(), beanName, specificInterceptors, new SingletonTargetSource(bean))
+AbstractAutoProxyCreator -> ProxyFactory:getProxy(getProxyClassLoader()
+ProxyFactory -> ProxyCreatorSupport:createAopProxy()
+ProxyCreatorSupport -> ProxyCreatorSupport:getAopProxyFactory()
+ProxyCreatorSupport -> DefaultAopProxyFactory:createAopProxy(AdvisedSupport config)
+DefaultAopProxyFactory -> JdkDynamicAopProxy:new JdkDynamicAopProxy(config)
+JdkDynamicAopProxy --> ProxyFactory:JdkDynamicAopProxy.getProxy(classLoader)
+ProxyFactory --> AbstractAutoProxyCreator:JdkDynamicAopProxy.getProxy(classLoader)
+
+@enduml
