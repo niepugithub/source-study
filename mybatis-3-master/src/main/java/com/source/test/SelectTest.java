@@ -11,6 +11,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -67,7 +68,7 @@ public class SelectTest {
 
     @Test
     public void testInsert() {
-        Employee employee = new Employee("insert用户", "zhSan@qq.com", "男", 2, "LOGIN");
+        Employee employee = new Employee("insert用户", "zhSan@qq.com", "男", 2, null);
         int i = sqlSession.insert("addEmployee", employee);
         sqlSession.commit();
         System.out.println(i);
@@ -77,10 +78,24 @@ public class SelectTest {
 
     @Test
     public void testDynamic() {
-        Employee employee = new Employee(null, null, "男", 2, "LOGIN");
+        Employee employee = new Employee(null, null, "男", 2, null);
         List<Employee> employees = sqlSession.selectList("dynamicQueryEmployee", employee);
         System.out.println(employees);
         System.out.println(employees.size());
 
+    }
+
+    @Test
+    public void addEmployee() {
+//        long id, String lastName, String email, String gender, long did, String empStatus
+        List list = new ArrayList();
+        list.add("a");
+        list.add("b");
+        list.add("c");
+
+        Employee employee = new Employee("insert用户", "zhSan@qq.com", "男", 2, list);
+
+        sqlSession.insert("addEmployee", employee);
+        sqlSession.commit();
     }
 }

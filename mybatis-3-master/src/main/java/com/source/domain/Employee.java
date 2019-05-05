@@ -2,6 +2,8 @@ package com.source.domain;
 
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * @description:
  * @author:niepu
@@ -16,9 +18,9 @@ public class Employee {
     private String email;
     private String gender;
     private long did;
-    private String empStatus;
+    private List<String> empStatus;
 
-    public Employee(long id, String lastName, String email, String gender, long did, String empStatus) {
+    public Employee(long id, String lastName, String email, String gender, long did, List<String> empStatus) {
         this.id = id;
         this.lastName = lastName;
         this.email = email;
@@ -27,7 +29,7 @@ public class Employee {
         this.empStatus = empStatus;
     }
 
-    public Employee(String lastName, String email, String gender, long did, String empStatus) {
+    public Employee(String lastName, String email, String gender, long did, List<String> empStatus) {
         this.lastName = lastName;
         this.email = email;
         this.gender = gender;
